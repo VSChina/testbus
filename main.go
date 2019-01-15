@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/devigned/tab"
+	tot "github.com/devigned/tab/opentracing"
 	"github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.opencensus.io/exporter/jaeger"
@@ -48,6 +50,8 @@ func setupOpenTracing() flusher {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	tab.Register(new(tot.Trace)) // tab defaults to opencensus
 
 	opentracing.InitGlobalTracer(tracer)
 	return &closeFlush{closer: closer}

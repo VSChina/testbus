@@ -6,9 +6,9 @@ require (
 	github.com/Azure/azure-sdk-for-go v24.0.0+incompatible // indirect
 	github.com/Azure/azure-service-bus-go v0.2.1-0.20190111220609-e2e2e7999442
 	github.com/Azure/go-autorest v11.3.0+incompatible
-	github.com/apache/thrift v0.12.0 // indirect
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/devigned/tab v0.0.1
+	github.com/devigned/tab/opentracing v0.0.1
 	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/opentracing/opentracing-go v1.0.2
@@ -23,7 +23,6 @@ require (
 	go.opencensus.io v0.18.1-0.20181204023538-aab39bd6a98b
 	go.uber.org/atomic v1.3.2 // indirect
 	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
-	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
 	golang.org/x/sys v0.0.0-20190114130336-2be517255631 // indirect
 	google.golang.org/api v0.1.0 // indirect
