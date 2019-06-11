@@ -1,30 +1,21 @@
 module github.com/devigned/testbus
 
 require (
-	contrib.go.opencensus.io/exporter/ocagent v0.4.1 // indirect
-	github.com/Azure/azure-amqp-common-go v1.1.4
-	github.com/Azure/azure-sdk-for-go v24.0.0+incompatible // indirect
-	github.com/Azure/azure-service-bus-go v0.2.1-0.20190111220609-e2e2e7999442
-	github.com/Azure/go-autorest v11.3.0+incompatible
-	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
-	github.com/devigned/tab v0.0.1
-	github.com/devigned/tab/opentracing v0.0.1
-	github.com/fortytw2/leaktest v1.3.0 // indirect
+	contrib.go.opencensus.io/exporter/jaeger v0.1.0
+	github.com/Azure/azure-amqp-common-go/v2 v2.0.0
+	github.com/Azure/azure-service-bus-go v0.8.0
+	github.com/Azure/go-autorest v12.0.0+incompatible
+	github.com/devigned/tab v0.1.1
+	github.com/devigned/tab/opentracing v0.1.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/opentracing/opentracing-go v1.0.2
-	github.com/pkg/errors v0.8.1 // indirect
-	github.com/sirupsen/logrus v1.3.0
+	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
-	github.com/stretchr/testify v1.3.0 // indirect
-	github.com/uber-go/atomic v1.3.2 // indirect
-	github.com/uber/jaeger-client-go v2.15.0+incompatible
-	github.com/uber/jaeger-lib v1.5.0
-	go.opencensus.io v0.18.1-0.20181204023538-aab39bd6a98b
-	go.uber.org/atomic v1.3.2 // indirect
-	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
-	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	golang.org/x/sys v0.0.0-20190114130336-2be517255631 // indirect
-	google.golang.org/api v0.1.0 // indirect
-	google.golang.org/genproto v0.0.0-20190111180523-db91494dd46c // indirect
+	go.opencensus.io v0.22.0
+	golang.org/x/net v0.0.0-20190611141213-3f473d35a33a // indirect
+	golang.org/x/sys v0.0.0-20190610200419-93c9922d18ae // indirect
+	google.golang.org/api v0.6.0 // indirect
+	google.golang.org/genproto v0.0.0-20190611190212-a7e196e89fd3 // indirect
+	google.golang.org/grpc v1.21.1 // indirect
+	gopkg.in/yaml.v2 v2.2.1 // indirect
 )
