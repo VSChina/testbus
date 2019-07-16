@@ -31,6 +31,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/devigned/tab v0.0.1/go.mod h1:oVYrfgGyond090gxCvvbjZji79+peOiSV6vhZhKJM0Y=
 github.com/devigned/tab v0.1.1 h1:3mD6Kb1mUOYeLpJvTVSDwSg5ZsfSxfvxGRTxRsJsITA=
 github.com/devigned/tab v0.1.1/go.mod h1:XG9mPq0dFghrYvoBF3xdRrJzSTX1b7IQrvaL9mzjeJY=
+github.com/devigned/tab/opencensus v0.1.2 h1:IkqF46qN8f1WCGwNlvMSVOPxAdFug29n9zLIlxGL7ms=
+github.com/devigned/tab/opencensus v0.1.2/go.mod h1:U6xXMXnNwXJpdaK0mnT3zdng4WTi+vCfqn7YHofEv2A=
 github.com/devigned/tab/opentracing v0.1.0 h1:RO7fvPTUVG10QKVSopKTz07OPu6MHHI1QmPCwxPiFmo=
 github.com/devigned/tab/opentracing v0.1.0/go.mod h1:2wWXFFHBgXlYbpdkAXrC0cFN6vGpVfEToq+cIjjkBmE=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=

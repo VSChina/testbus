@@ -1,11 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"contrib.go.opencensus.io/exporter/jaeger"
-	_ "github.com/devigned/tab/opentracing"
+	_ "github.com/devigned/tab/opencensus"
 	"go.opencensus.io/trace"
 
 	"github.com/devigned/testbus/cmd"
@@ -17,6 +18,7 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
+		
 		defer closer()
 	}
 	cmd.Execute()
