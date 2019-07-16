@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	servicebus "github.com/Azure/azure-service-bus-go"
 	"os"
 
 	"github.com/Azure/azure-amqp-common-go/v2/conn"
@@ -20,6 +22,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "debug level logging")
 	log.SetFormatter(&log.TextFormatter{TimestampFormat: "2006-01-02 15:04:05", FullTimestamp: true})
 }
+
+const testDurationInMs = 60000 * 5 * 12 * 24 * 7 // 1 week
 
 var (
 	namespace, suffix, entityPath, sasKeyName, sasKey, connStr string
@@ -82,4 +86,18 @@ func environment() azure.Environment {
 		env.ServiceBusEndpointSuffix = suffix
 	}
 	return env
+}
+
+func ensureQueue(ctx context.Context, ns *servicebus.Namespace, queueName string) (*servicebus.QueueEntity, error) {
+	manager := ns.NewQueueManager()
+	queueEntity, err := manager.Get(ctx, queueName)
+	if err != nil {
+		if !servicebus.IsErrNotFound(err) {
+			return nil, err
+		}
+	}
+	if queueEntity != nil {
+		return queueEntity, nil
+	}
+	return manager.Put(ctx, queueName)
 }
