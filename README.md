@@ -13,8 +13,13 @@ go run main.go receive --conn-str 'Endpoint=...'
 
 ## Trace with OpenTracing
 ```bash
-TRACING=OT go run main.go send --msg-count 100 --conn-str 'Endpoint=...'
+TRACING=true go run main.go send --msg-count 100 --conn-str 'Endpoint=...'
 ```
 ```bash
-TRACING=OT go run main.go receive --conn-str 'Endpoint=...'
+TRACING=true go run main.go receive --conn-str 'Endpoint=...'
+```
+
+## Low-Level AMQP Protocol Logging
+```bash
+DEBUG-LEVEL=3 go run -tags debug main.go
 ```
