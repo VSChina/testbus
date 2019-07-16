@@ -4,15 +4,6 @@ Send and receive from Service Bus while tracing using either OpenCensus or OpenT
 
 ## Trace with OpenCensus
 ```bash
-go run main.go send --msg-count 100 --conn-str 'Endpoint=...'
-```
-```bash
-go run main.go receive --conn-str 'Endpoint=...'
-```
-
-
-## Trace with OpenTracing
-```bash
 TRACING=true go run main.go send --msg-count 100 --conn-str 'Endpoint=...'
 ```
 ```bash
