@@ -3,8 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/signal"
 	"sync/atomic"
 
 	"github.com/Azure/azure-service-bus-go"
@@ -36,7 +34,7 @@ var (
 		Args: func(cmd *cobra.Command, args []string) error {
 			return checkAuthFlags()
 		},
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: RunWithCtx(func(ctx context.Context, cmd *cobra.Command, args []string) {
 			ns, err := servicebus.NewNamespace(servicebus.NamespaceWithConnectionString(connStr))
 			if err != nil {
 				log.Error(err)
@@ -60,19 +58,9 @@ var (
 				return
 			}
 
-			// Wait for a signal to quit:
-			signalChan := make(chan os.Signal, 1)
-			signal.Notify(signalChan, os.Interrupt, os.Kill)
-
-			select {
-			case <-ctx.Done():
-				break
-			case <-signalChan:
-				break
-			}
-
+			<- ctx.Done()
 			fmt.Println("received")
-		},
+		}),
 	}
 )
 
