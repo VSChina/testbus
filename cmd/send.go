@@ -36,19 +36,16 @@ var (
 			}
 			return checkAuthFlags()
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			ctx, span := tab.StartSpan(context.Background(), "send.Run")
-			defer span.End()
-
+		Run: RunWithCtx(func(ctx context.Context, cmd *cobra.Command, args []string) {
 			ns, err := servicebus.NewNamespace(servicebus.NamespaceWithConnectionString(connStr))
 			if err != nil {
-				log.Error(err)
+				tab.For(ctx).Error(err)
 				return
 			}
 
 			q, err := ns.NewQueue(entityPath)
 			if err != nil {
-				log.Error(err)
+				tab.For(ctx).Error(err)
 				return
 			}
 
@@ -63,6 +60,7 @@ var (
 
 				err := q.Send(ctx, servicebus.NewMessage(data))
 				if err != nil {
+					tab.For(ctx).Error(err)
 					return err
 				}
 				sentMsgs++
@@ -73,16 +71,16 @@ var (
 				data := make([]byte, sendParams.messageSize)
 				_, err := rand.Read(data)
 				if err != nil {
-					log.Errorln("unable to generate random bits for message")
+					tab.For(ctx).Error(err)
 					continue
 				}
 				if err := sendMsg(data); err != nil {
-					log.Error(err)
+					tab.For(ctx).Error(err)
 					return
 				}
 			}
 
 			log.Printf("sent %d messages\n", sentMsgs)
-		},
+		}),
 	}
 )

@@ -6,9 +6,11 @@ import (
 	"fmt"
 	servicebus "github.com/Azure/azure-service-bus-go"
 	"os"
+	"os/signal"
 
 	"github.com/Azure/azure-amqp-common-go/v2/conn"
 	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/devigned/tab"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -35,6 +37,27 @@ var (
 		TraverseChildren: true,
 	}
 )
+
+func RunWithCtx(run func(ctx context.Context, cmd *cobra.Command, args []string)) func(cmd *cobra.Command, args []string) {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Wait for a signal to quit:
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, os.Kill)
+
+	go func(){
+		<-signalChan
+		cancel()
+	}()
+
+	return func(cmd *cobra.Command, args []string) {
+		ctx, span := tab.StartSpan(ctx, cmd.Name() + ".Run")
+		defer span.End()
+		defer cancel()
+
+		run(ctx, cmd, args)
+	}
+}
 
 // Execute kicks off the command line
 func Execute() {
