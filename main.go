@@ -8,7 +8,7 @@ import (
 	_ "github.com/devigned/tab/opencensus"
 	"go.opencensus.io/trace"
 
-	"github.com/devigned/testbus/cmd"
+	"github.com/VSChina/testbus/cmd"
 )
 
 func main() {

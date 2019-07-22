@@ -1,4 +1,4 @@
-PACKAGE  		= github.com/devigned/testbus
+PACKAGE  		= github.com/VSChina/testbus
 DATE    		?= $(shell date +%FT%T%z)
 VERSION 		?= $(shell git rev-list -1 HEAD)
 SHORT_VERSION 	?= $(shell git rev-parse --short HEAD)
