@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: completetest
+  labels:
+    app: completetest
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: completetest
+  template:
+    metadata:
+      labels:
+        app: completetest
+    spec:
+      containers:
+        - name: testbus
+          image: jieshe/testhub:latest
+          imagePullPolicy: Always
+          command: ["./testbus"]
+          args: [
+            "complete",
+            "--conn-str=$(SERVICEBUS_CONNECTION_STRING)"
+          ]
+          env:
+            - name: SERVICEBUS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: testbus-secret
+                  key: connStr

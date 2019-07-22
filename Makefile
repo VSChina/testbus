@@ -6,10 +6,10 @@ SHORT_VERSION 	?= $(shell git rev-parse --short HEAD)
 all: build
 
 build:
-	go build -ldflags "-X $(PACKAGE)/cmd.GitCommit=$(VERSION)" -o ./bin/testbus
+	go build -ldflags "-X $(PACKAGE)/cmd.GitCommit=$(VERSION)" -o bin/testbus
 
 build-debug:
-	go build -o ./bin/testbus -tags debug
+	go build -o bin/testbus -tags debug
 
 gox:
-	gox -osarch="darwin/amd64 windows/amd64 linux/amd64" -ldflags "-X $(PACKAGE)/cmd.GitCommit=$(VERSION)" -output "./bin/$(SHORT_VERSION)/{{.Dir}}_{{.OS}}_{{.Arch}}"
+	gox -osarch="darwin/amd64 windows/amd64 linux/amd64" -ldflags "-X $(PACKAGE)/cmd.GitCommit=$(VERSION)" -output "bin/$(SHORT_VERSION)/{{.Dir}}_{{.OS}}_{{.Arch}}"
