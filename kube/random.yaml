@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: completetest
+  name: randomtest
   namespace: testbus
   labels:
-    app: completetest
+    app: randomtest
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: completetest
+      app: randomtest
   template:
     metadata:
       labels:
-        app: completetest
+        app: randomtest
     spec:
       containers:
         - name: testbus
@@ -21,7 +21,7 @@ spec:
           imagePullPolicy: Always
           command: ["testbus"]
           args: [
-            "complete",
+            "random",
             "--conn-str=$(SERVICEBUS_CONNECTION_STRING)"
           ]
           env:

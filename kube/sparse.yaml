@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: completetest
+  name: sparsetest
   namespace: testbus
   labels:
-    app: completetest
+    app: sparsetest
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: completetest
+      app: sparsetest
   template:
     metadata:
       labels:
-        app: completetest
+        app: sparsetest
     spec:
       containers:
         - name: testbus
@@ -21,7 +21,7 @@ spec:
           imagePullPolicy: Always
           command: ["testbus"]
           args: [
-            "complete",
+            "sparse",
             "--conn-str=$(SERVICEBUS_CONNECTION_STRING)"
           ]
           env:

@@ -9,4 +9,5 @@ RUN make
 
 FROM alpine:3.10
 WORKDIR /
+RUN apk add ca-certificates
 COPY --from=build-dev /go/src/github.com/VSChina/testhub .
