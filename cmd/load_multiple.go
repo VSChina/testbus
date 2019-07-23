@@ -33,6 +33,7 @@ var (
 			if debug {
 				log.SetLevel(log.DebugLevel)
 			}
+			entityPath = generateQueueName()
 			return checkAuthFlags()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
@@ -87,6 +88,7 @@ var (
 					if err != nil {
 						log.Error(err)
 					}
+					cleanupQueue(ctx, ns, loadMultipleParams.clients[i].Name)
 				}
 			}()
 		},

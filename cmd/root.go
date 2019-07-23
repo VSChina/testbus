@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	servicebus "github.com/Azure/azure-service-bus-go"
-	"os"
-	"os/signal"
-
 	"github.com/Azure/azure-amqp-common-go/v2/conn"
+	servicebus "github.com/Azure/azure-service-bus-go"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/devigned/tab"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"math/rand"
+	"os"
+	"os/signal"
+	"time"
 )
 
 func init() {
@@ -30,6 +31,7 @@ const testDurationInMs = 60000 * 5 * 12 * 24 * 7 // 1 week
 var (
 	namespace, suffix, entityPath, sasKeyName, sasKey, connStr string
 	debug                                                      bool
+	letters                                                    = []rune("abcdefghijklmnopqrstuvwxyz")
 
 	rootCmd = &cobra.Command{
 		Use:              "testbus",
@@ -45,13 +47,13 @@ func RunWithCtx(run func(ctx context.Context, cmd *cobra.Command, args []string)
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, os.Kill)
 
-	go func(){
+	go func() {
 		<-signalChan
 		cancel()
 	}()
 
 	return func(cmd *cobra.Command, args []string) {
-		ctx, span := tab.StartSpan(ctx, cmd.Name() + ".Run")
+		ctx, span := tab.StartSpan(ctx, cmd.Name()+".Run")
 		defer span.End()
 		defer cancel()
 
@@ -74,7 +76,9 @@ func checkAuthFlags() error {
 			return err
 		}
 		namespace = parsed.Namespace
-		entityPath = parsed.HubName
+		if entityPath == "" {
+			entityPath = parsed.HubName
+		}
 		suffix = parsed.Suffix
 		sasKeyName = parsed.KeyName
 		sasKey = parsed.Key
@@ -111,16 +115,40 @@ func environment() azure.Environment {
 	return env
 }
 
+// Ensure each queue for testing is newly created
 func ensureQueue(ctx context.Context, ns *servicebus.Namespace, queueName string) (*servicebus.QueueEntity, error) {
 	manager := ns.NewQueueManager()
-	queueEntity, err := manager.Get(ctx, queueName)
-	if err != nil {
+	_, err := manager.Get(ctx, queueName)
+	if err == nil {
+		_ = manager.Delete(ctx, queueName)
+	} else {
 		if !servicebus.IsErrNotFound(err) {
 			return nil, err
 		}
 	}
-	if queueEntity != nil {
-		return queueEntity, nil
-	}
 	return manager.Put(ctx, queueName)
+}
+
+func cleanupQueue(ctx context.Context, ns *servicebus.Namespace, queueName string) {
+	manager := ns.NewQueueManager()
+	_, err := manager.Get(ctx, queueName)
+	if err == nil {
+		_ = manager.Delete(ctx, queueName)
+	}
+}
+
+// Generate a random queue name for testing
+func generateQueueName() string {
+	rand.Seed(time.Now().UnixNano())
+	generatedName := randSeq(10)
+	log.Infof("Generate queue name with %s", generatedName)
+	return generatedName
+}
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }

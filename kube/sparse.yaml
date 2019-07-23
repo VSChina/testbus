@@ -1,15 +1,11 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: sparsetest
   namespace: testbus
   labels:
     app: sparsetest
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: sparsetest
   template:
     metadata:
       labels:
@@ -21,7 +17,7 @@ spec:
           imagePullPolicy: Always
           command: ["testbus"]
           args: [
-            "sparse",
+            "sparse-test",
             "--conn-str=$(SERVICEBUS_CONNECTION_STRING)"
           ]
           env:
@@ -30,3 +26,5 @@ spec:
                 secretKeyRef:
                   name: testbus-secret
                   key: connStr
+      restartPolicy: Never
+  backoffLimit: 1

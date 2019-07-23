@@ -1,15 +1,11 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: randomtest
   namespace: testbus
   labels:
     app: randomtest
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: randomtest
   template:
     metadata:
       labels:
@@ -30,3 +26,5 @@ spec:
                 secretKeyRef:
                   name: testbus-secret
                   key: connStr
+      restartPolicy: Never
+  backoffLimit: 1

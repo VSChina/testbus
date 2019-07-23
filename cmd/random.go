@@ -53,6 +53,7 @@ var (
 			if debug {
 				log.SetLevel(log.DebugLevel)
 			}
+			entityPath = generateQueueName()
 			return checkAuthFlags()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
@@ -83,6 +84,9 @@ var (
 			go sendRandomMsg(ctx)
 			go randomSnapshot()
 			randomCxt.waitGroup.Wait()
+
+			_ = randomCxt.queue.Close(ctx)
+			cleanupQueue(ctx, ns, entityPath)
 		},
 	}
 )

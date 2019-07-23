@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 type (
 	completeContext struct {
 		queue      *servicebus.Queue
@@ -44,6 +43,7 @@ var (
 			if debug {
 				log.SetLevel(log.DebugLevel)
 			}
+			entityPath = generateQueueName()
 			return checkAuthFlags()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
@@ -76,6 +76,9 @@ var (
 			go completeSnapshot()
 
 			completeCxt.waitGroup.Wait()
+
+			_ = completeCxt.queue.Close(ctx)
+			cleanupQueue(ctx, ns, entityPath)
 		},
 	}
 )
