@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: randomtest
+  namespace: testbus
+  labels:
+    app: randomtest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: randomtest
+  template:
+    metadata:
+      labels:
+        app: randomtest
+    spec:
+      containers:
+        - name: testbus
+          image: jieshe/testbus:latest
+          imagePullPolicy: Always
+          command: ["testbus"]
+          args: [
+            "random",
+            "--conn-str=$(SERVICEBUS_CONNECTION_STRING)"
+          ]
+          env:
+            - name: SERVICEBUS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: testbus-secret
+                  key: connStr

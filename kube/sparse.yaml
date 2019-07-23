@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sparsetest
+  namespace: testbus
+  labels:
+    app: sparsetest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sparsetest
+  template:
+    metadata:
+      labels:
+        app: sparsetest
+    spec:
+      containers:
+        - name: testbus
+          image: jieshe/testbus:latest
+          imagePullPolicy: Always
+          command: ["testbus"]
+          args: [
+            "sparse",
+            "--conn-str=$(SERVICEBUS_CONNECTION_STRING)"
+          ]
+          env:
+            - name: SERVICEBUS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: testbus-secret
+                  key: connStr
