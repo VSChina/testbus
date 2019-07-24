@@ -92,6 +92,7 @@ var (
 			if debug {
 				log.SetLevel(log.DebugLevel)
 			}
+			entityPath = generateQueueName("max-send")
 			return checkAuthFlags()
 		},
 		Run: func(cmd *cobra.Command, args []string) {

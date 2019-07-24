@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"errors"
+	"os"
+	"os/signal"
 	"strconv"
 	"sync"
 	"time"
@@ -43,12 +45,14 @@ var (
 			if debug {
 				log.SetLevel(log.DebugLevel)
 			}
-			entityPath = generateQueueName()
+			entityPath = generateQueueName("complete")
 			return checkAuthFlags()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx, span := tab.StartSpan(context.Background(), "complete.Run")
 			defer span.End()
+			ctx, runCancel := context.WithCancel(ctx)
+			defer runCancel()
 
 			ns, err := servicebus.NewNamespace(servicebus.NamespaceWithConnectionString(connStr))
 			if err != nil {
@@ -69,16 +73,25 @@ var (
 			}
 			completeCxt.queue = q
 
-			go receiveMsg()
-			time.Sleep(3 * time.Second)
+			go receiveMsg(ctx)
+			time.Sleep(time.Second)
 			go sendMsg(ctx)
 
-			go completeSnapshot()
+			go completeSnapshot(ctx)
+
+			signalChan := make(chan os.Signal, 1)
+			signal.Notify(signalChan, os.Interrupt, os.Kill)
+
+			go func() {
+				<-signalChan
+				log.Println("closing via OS signal...")
+				cleanupQueue(ctx, ns, q)
+				runCancel()
+				return
+			}()
 
 			completeCxt.waitGroup.Wait()
-
-			_ = completeCxt.queue.Close(ctx)
-			cleanupQueue(ctx, ns, entityPath)
+			cleanupQueue(ctx, ns, q)
 		},
 	}
 )
@@ -86,7 +99,7 @@ var (
 func sendMsg(ctx context.Context) {
 	ctx, span := tab.StartSpan(ctx, "complete.sendMsg")
 	defer span.End()
-	ctx, cancel := context.WithTimeout(ctx, (testDurationInMs+5000)*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, (testDurationInMs+5000)*time.Millisecond)
 	defer cancel()
 	messageID := 1
 
@@ -101,14 +114,14 @@ func sendMsg(ctx context.Context) {
 		completeCxt.messageSet[message.ID] = true
 		messageID++
 		completeCxt.sentMsgs++
-		time.Sleep(500 * time.Millisecond) // Throttling send to not increase queue size
+		time.Sleep(300 * time.Millisecond) // Throttling send to not increase queue size
 	}
 	log.Printf("sent %d messages\n", completeCxt.sentMsgs)
 	completeCxt.waitGroup.Done()
 }
 
-func receiveMsg() {
-	ctx, span := tab.StartSpan(context.Background(), "complete.receive.Run")
+func receiveMsg(ctx context.Context) {
+	ctx, span := tab.StartSpan(ctx, "complete.receive.Run")
 	defer span.End()
 	ctx, cancel := context.WithTimeout(ctx, testDurationInMs*time.Millisecond)
 	defer cancel()
@@ -137,9 +150,15 @@ func (mc *completeHandler) Handle(ctx context.Context, msg *servicebus.Message) 
 	return msg.Complete(ctx)
 }
 
-func completeSnapshot() {
-	for range time.Tick(time.Minute) {
-		log.Infof("Map size: %d, Number of messages sent and received successfully so far : %d",
-			len(completeCxt.messageSet), completeCxt.sentMsgs)
+func completeSnapshot(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			time.Sleep(time.Minute)
+			log.Infof("Map size: %d, Number of messages sent and received successfully so far : %d",
+				len(completeCxt.messageSet), completeCxt.sentMsgs)
+		}
 	}
 }
