@@ -97,6 +97,7 @@ var (
 			if debug {
 				log.SetLevel(log.DebugLevel)
 			}
+			entityPath = generateQueueName("sparse")
 			return checkAuthFlags()
 		},
 		Run: RunWithCtx(func(ctx context.Context, cmd *cobra.Command, args []string) {

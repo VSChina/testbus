@@ -126,22 +126,29 @@ func ensureQueue(ctx context.Context, ns *servicebus.Namespace, queueName string
 			return nil, err
 		}
 	}
+	log.Infof("Creating queue %s", queueName)
 	return manager.Put(ctx, queueName)
 }
 
-func cleanupQueue(ctx context.Context, ns *servicebus.Namespace, queueName string) {
+func cleanupQueue(ctx context.Context, ns *servicebus.Namespace, queue *servicebus.Queue) {
+	if queue == nil {
+		return
+	}
+	_ = queue.Close(ctx)
 	manager := ns.NewQueueManager()
+	queueName := queue.Name
 	_, err := manager.Get(ctx, queueName)
 	if err == nil {
+		log.Infof("Deleting queue %s", queueName)
 		_ = manager.Delete(ctx, queueName)
 	}
 }
 
 // Generate a random queue name for testing
-func generateQueueName() string {
+func generateQueueName(t string) string {
 	rand.Seed(time.Now().UnixNano())
-	generatedName := randSeq(10)
-	log.Infof("Generate queue name with %s", generatedName)
+	generatedName := fmt.Sprintf("%s-%s", t, randSeq(10))
+	log.Infof("Generating queue name with %s", generatedName)
 	return generatedName
 }
 

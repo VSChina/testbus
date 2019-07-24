@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"math/rand"
+	"os"
+	"os/signal"
 	"sync"
 	"time"
 
@@ -53,12 +55,14 @@ var (
 			if debug {
 				log.SetLevel(log.DebugLevel)
 			}
-			entityPath = generateQueueName()
+			entityPath = generateQueueName("random")
 			return checkAuthFlags()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx, span := tab.StartSpan(context.Background(), "random.Run")
 			defer span.End()
+			ctx, runCancel := context.WithCancel(ctx)
+			defer runCancel()
 
 			ns, err := servicebus.NewNamespace(servicebus.NamespaceWithConnectionString(connStr))
 			if err != nil {
@@ -79,14 +83,24 @@ var (
 			}
 			randomCxt.queue = q
 
-			go receiveRandomMsg()
-			time.Sleep(3 * time.Second)
+			go receiveRandomMsg(ctx)
+			time.Sleep(time.Second)
 			go sendRandomMsg(ctx)
-			go randomSnapshot()
-			randomCxt.waitGroup.Wait()
+			go randomSnapshot(ctx)
 
-			_ = randomCxt.queue.Close(ctx)
-			cleanupQueue(ctx, ns, entityPath)
+			signalChan := make(chan os.Signal, 1)
+			signal.Notify(signalChan, os.Interrupt, os.Kill)
+
+			go func() {
+				<-signalChan
+				log.Println("closing via OS signal...")
+				cleanupQueue(ctx, ns, q)
+				runCancel()
+				return
+			}()
+
+			randomCxt.waitGroup.Wait()
+			cleanupQueue(ctx, ns, q)
 		},
 	}
 )
@@ -116,8 +130,8 @@ func sendRandomMsg(ctx context.Context) {
 	randomCxt.waitGroup.Done()
 }
 
-func receiveRandomMsg() {
-	ctx, span := tab.StartSpan(context.Background(), "random.receive.Run")
+func receiveRandomMsg(ctx context.Context) {
+	ctx, span := tab.StartSpan(ctx, "random.receive.Run")
 	defer span.End()
 	ctx, cancel := context.WithTimeout(ctx, testDurationInMs*time.Millisecond)
 	defer cancel()
@@ -134,6 +148,8 @@ func receiveRandomMsg() {
 func (mc *randomHandler) Handle(ctx context.Context, msg *servicebus.Message) error {
 	ctx, span := tab.StartSpan(ctx, "random.messageCounter.Handle")
 	defer span.End()
+	ctx, cancel := context.WithTimeout(ctx, testDurationInMs*time.Millisecond)
+	defer cancel()
 
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
@@ -172,15 +188,21 @@ func (mc *randomHandler) Handle(ctx context.Context, msg *servicebus.Message) er
 	}
 }
 
-func randomSnapshot() {
-	for range time.Tick(time.Minute) {
-		log.Infof(`Number of messages not processed yet : %d
+func randomSnapshot(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			time.Sleep(time.Minute)
+			log.Infof(`Number of messages not processed yet : %d
 Number of messages sent so far : %d
 Number of messages abandoned : %d
 Number of messages completed : %d
 Number of messages deadlettered : %d
 Number of messages deferred : %d`,
-			len(randomCxt.messageToProcess), randomCxt.sentMsgs, randomCxt.abandonCount,
-			randomCxt.completeCount, randomCxt.deadletterCount, randomCxt.deferCount)
+				len(randomCxt.messageToProcess), randomCxt.sentMsgs, randomCxt.abandonCount,
+				randomCxt.completeCount, randomCxt.deadletterCount, randomCxt.deferCount)
+		}
 	}
 }
